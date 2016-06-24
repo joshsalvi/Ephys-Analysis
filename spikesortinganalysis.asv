@@ -99,7 +99,7 @@ for m = 1:length(nonraw)
         
         % Extract spikes, peaks in command signal, set maximum frequency
         % limit for optimization purposes
-        thr = 5*median(abs(x)./0.6745);
+        thr = 10*median(abs(x)./0.6745);
         [pk{m}, tr{m}] = PTDetect(x, thr);
         [pkstim{m}, trstim{m}] = PTDetect(xc, std(xc-mean(xc)));
         numpkstim = length(pkstim{m});
@@ -481,16 +481,12 @@ m2=1;
         meanphase_sorted{m}(k) = mean(xc_phase_spikes_sorted{m}{k});
         semphase_sorted{m}(k) = std(xc_phase_spikes_sorted{m}{k})/sqrt(sum(T{m}==k));
         VS_sorted(m,k) = 1/length(tr{m}(T{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted{m}{k})));
-        end
-        try
         if stim_freq(m) < max_freq
         clear pks_present
         for j = 1:numpkstim
             pks_present(j) = length(intersect(1 + (j-1)*sl_stim:j*sl_stim,tr{m}(T{m}==k)))>0;
         end
         scaling_fac_VS_sorted(m,k) = sum(pks_present)/numpkstim;
-        end
-        try
         if scaling_fac_VS_sorted(m,k) > 1
             warning(['Scaling factor for vector strength exceeds 1 at index ' num2str(m) '.']);
         elseif scaling_fac_VS_sorted(m,k) < 0
@@ -509,18 +505,12 @@ m2=1;
         meanphase_sorted2{m}(k) = mean(xc_phase_spikes_sorted2{m}{k});
         semphase_sorted2{m}(k) = std(xc_phase_spikes_sorted2{m}{k})/sqrt(sum(T2{m}==k));
         VS_sorted2(m,k) = 1/length(tr{m}(T2{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted2{m}{k})));
-        end
-        try
         if stim_freq(m) < max_freq
         clear pks_present
         for j = 1:numpkstim
             pks_present2(j) = length(intersect(1 + (j-1)*sl_stim:j*sl_stim,tr{m}(T2{m}==k)))>0;
         end
-        end
-        try
         scaling_fac_VS_sorted2(m,k) = sum(pks_present2(j))/numpkstim;
-        end
-        try
         if scaling_fac_VS_sorted2(m,k) > 1
             warning(['Scaling factor for vector strength exceeds 1 at index ' num2str(m) '.']);
         elseif scaling_fac_VS_sorted(m,k) < 0
@@ -537,43 +527,28 @@ end
 try
     inc = find(VS_sorted(m,:)<0.99);
     inc2 = find(VS_sorted2(m,:)<0.99);
-end
-try
     VS_max(m) = max(VS_sorted(m,inc));                  % Maximum VS
     VS_max2(m) = max(VS_sorted2(m,inc2));                  % Maximum VS
-end
-try
     maxind = find(VS_sorted(m,:)==VS_max(m));    % Neuron index
     maxind2 = find(VS_sorted2(m,:)==VS_max2(m));    % Neuron index
     VS_max_ind(m) = maxind(1);VS_max_ind2(m) = maxind2(1);
-end
-try
     numspk_max(m) = size(spikes_sorted{m}{VS_max_ind(m)},2);
     numspk_max2(m) = size(spikes_sorted2{m}{VS_max_ind2(m)},2);
     proportion_numspk_max(m) = numspk_max(m)/length(tr{m});
-end
-try
     VSsc_max(m) = max(VSsc_sorted(m,inc));
     maxind = find(VSsc_sorted(m,:)==VSsc_max(m));
     VSsc_max_ind(m) = maxind(1);
-end
-try
     numspk_max_sc(m) = size(spikes_sorted{m}{VSsc_max_ind(m)},2);
     proportion_numspk_max_sc(m) = numspk_max_sc(m)/length(tr{m});
     samepk_scaled(m) = VS_max_ind(m) == VSsc_max_ind(m);
     proportion_numspk_max2(m) = numspk_max2(m)/length(tr{m});
-end
-try
     VSsc_max2(m) = max(VSsc_sorted2(m,inc2));
     maxind2 = find(VSsc_sorted2(m,:)==VSsc_max2(m));
     VSsc_max_ind2(m) = maxind2(1);
-end
-try
     numspk_max_sc2(m) = size(spikes_sorted2{m}{VSsc_max_ind2(m)},2);
     proportion_numspk_max_sc2(m) = numspk_max_sc2(m)/length(tr{m});
     samepk_scaled2(m) = VS_max_ind2(m) == VSsc_max_ind2(m);
 end
-
 
     end
 end
@@ -972,9 +947,6 @@ else
     disp('Skipping plots...');
 end
 
-spc1 = 0;
-
-if spc1 == 1
 % Supraparamagnetic clustering
 disp('Doing supraparamagnetic clustering...');
 samplingInterval = 1/Fs;
@@ -992,19 +964,18 @@ for j = 1:length(Ir)
 end
 if datapath(end) == '/'
     save([datapath 'Extracted Data-waveclus.mat']);
-    Get_spikes([datapath 'Extracted Data-waveclus.mat']);
+    Get_spikes([datapath 'Extracted Data-waveclus.mat','parallel',true,'par',par]);
     Do_clustering([datapath 'Extracted Data-waveclus_spikes.mat']);
     importdata([datapath 'fig2print_Extracted Data-wave_clus.png']);
     figure;h1 = [h1 17];
     imshow(fig2print_ExtractedData0x2Dwave_clus);
 else
     save([datapath '/Extracted Data-waveclus.mat']);
-    Get_spikes([datapath '/Extracted Data-waveclus.mat']);
+    Get_spikes([datapath '/Extracted Data-waveclus.mat','parallel',true,'par',par]);
     Do_clustering([datapath '/Extracted Data-waveclus_spikes.mat']);
     importdata([datapath '/fig2print_Extracted Data-wave_clus.png']);
     figure;h1 = [h1 17];
     imshow(fig2print_ExtractedData0x2Dwave_clus);
-end
 end
 
 
@@ -1014,21 +985,16 @@ if saveyn == 1
     if datapath(end) == '/'
         save([datapath 'Analyzed Data-' num2str(date) '.mat']);
         disp(['Saved as ' datapath 'Analyzed Data-' num2str(date) '.mat'])
-        if spc1 == 1
-            load([datapath 'times_Extracted Data-wave_clus.mat']);
-            importdata([datapath 'spc_log.txt']);loginfo = ans.textdata;
-            save([datapath 'Analyzed Data-supraparamagnetic-' num2str(date) '.mat'],'cluster_class','forced','index','inspk','ipermut','par','spikes','Temp','loginfo');
-            disp('Saved SPC data.');
-        end
+        load([datapath 'times_Extracted Data-wave_clus.mat']);
+        importdata([datapath 'spc_log.']);
+        save([datapath 'Analyzed Data-supraparamagnetic-' num2str(date) '.mat'],'cluster_class','forced','index','inspk','ipermut','par','spikes','Temp');
+        disp('Saved SPC data.');
     else
         save([datapath '/Analyzed Data-' num2str(date) '.mat']);
         disp(['Saved as ' datapath '/Analyzed Data-' num2str(date) '.mat'])
-        if spc1 == 1
-            load([datapath '/times_Extracted Data-wave_clus.mat']);
-            importdata([datapath '/spc_log.txt']);loginfo = ans.textdata;
-            save([datapath '/Analyzed Data-supraparamagnetic-' num2str(date) '.mat'],'cluster_class','forced','index','inspk','ipermut','par','spikes','Temp','loginfo');
-            disp('Saved SPC data.');
-        end
+        load([datapath '/times_Extracted Data-wave_clus.mat']);
+        save([datapath '/Analyzed Data-supraparamagnetic-' num2str(date) '.mat'],'cluster_class','forced','index','inspk','ipermut','par','spikes','Temp');
+        disp('Saved SPC data.');
     end
 else
     disp('Data not saved.')

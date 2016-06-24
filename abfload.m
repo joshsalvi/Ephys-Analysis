@@ -806,6 +806,7 @@ switch h.nOperationMode
 end
 fclose(fid);
 
+%{
 % finally, possibly add information on episode number to tags
 if ~isempty(h.tags) && isfield(h,'sweepStartInPts')
   for i=1:numel(h.tags)
@@ -813,7 +814,7 @@ if ~isempty(h.tags) && isfield(h,'sweepStartInPts')
     h.tags(i).episodeIndex=tmp(end);
   end
 end
-
+%}
 
 % ########################################################################
 %                         LOCAL FUNCTIONS
