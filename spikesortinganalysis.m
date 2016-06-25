@@ -71,7 +71,7 @@ end
 disp('Sorting and analyzing spikes...');
 
 % Spike analysis
-setfiguredefaults;
+setfiguredefaults(10);
 tel = 0;
 tel1 = 0;
 tel2 = 0;
@@ -79,7 +79,7 @@ tel2 = 0;
 % initialization
 for m = 1:length(nonraw)
     tic;
-    try
+    
         tel = tel1 + tel2 + tel;
         disp(['Iteration ' num2str(m) ' out of ' num2str(length(nonraw)) '; Total time elapsed: ' num2str(tel) ' seconds.']);
     
@@ -191,18 +191,23 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
                 numclust(m) = input('Number of clusters:   ');
                 dims(m) = input('Dimensions (1,2,3,...):   ');
             else
-                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:6);
+                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:4);
                 numclust(m) = evalclust{m}.OptimalK;
             end
         else
-            evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:6);
+            evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:4);
 
             numclust(m) = evalclust{m}.OptimalK;
         end
-        
-        GMmodel{m} = fitgmdist(c{m}(:,1:dims(m)),numclust(m),'Replicates',10);
-        T{m} = cluster(GMmodel{m},c{m}(:,1:dims(m)));
-        explainedvariance(m) = sum(explained{m}(1:dims(m)));
+        try
+            GMmodel{m} = fitgmdist(c{m}(:,1:dims(m)),numclust(m),'Replicates',10);
+            T{m} = cluster(GMmodel{m},c{m}(:,1:dims(m)));
+            explainedvariance(m) = sum(explained{m}(1:dims(m)));
+        catch
+            disp('Error. Line 207.');
+            T{m} = [];
+            explainedvariance(m) = 0;
+        end
         
         if explainedvariance(m) < 80
             dims(m) = dims(m) + 1;
@@ -242,6 +247,8 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
 %         T{m} = kmeans(c{m}(:,1:dims(m)),numclust(m),'Replicates',10);
         GMmodel{m} = fitgmdist(c{m}(:,1:dims(m)),numclust(m),'Replicates',10);
         T{m} = cluster(GMmodel{m},c{m}(:,1:dims(m)));
+    catch
+        disp('Unable to find number of clusters. Line 246.');
     end
 %}
     
@@ -250,7 +257,7 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
     for k = 1:numclust(m)
         spikes_sorted{m}{k} = spikes{m}(:,T{m}==k);
         spikes_stim_sorted{m}{k} = spikes_stim{m}(:,T{m}==k);
-        entropy_spikes_stim_sorted(m,k) = entropy(mean(spikes_stim_sorted{m}{k},2))/log(length(mean(spikes_stim_sorted{m}{k},2)));
+        entropy_spikes_stim_sorted(m,k) = entropy1(mean(spikes_stim_sorted{m}{k},2),2^8)/log10(2^8);
         entropy_diff(m,k) = entropy_spikes_stim_sorted(m,k) - entropy_stim(m);
         tr_sorted{m}{k} = tr{m}(T{m}==k);
 %         pk_sorted{m}{k} = pk{m}(T{m}==k);
@@ -344,20 +351,26 @@ m2=1;
 %                 for j = 2:5
 %                     clust2(:,j-1) = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',j,'Replicates',10);
 %                 end
-                evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:6);
+                evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:4);
                 numclust2(m) = evalclust2{m}.OptimalK;
             end
         else
 %             for j = 2:5
 %                 clust2(:,j-1) = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',j,'Replicates',10);
 %             end
-            evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:6);
+            evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:4);
             numclust2(m) = evalclust2{m}.OptimalK;
         end
         
-%         T2{m} = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',numclust2(m),'Replicates',10);
-        GMmodel2{m} = fitgmdist([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]',numclust2(m),'Replicates',10);
-        T2{m} = cluster(GMmodel2{m},[cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]');
+        try
+%           T2{m} = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',numclust2(m),'Replicates',10);
+            GMmodel2{m} = fitgmdist([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]',numclust2(m),'Replicates',10);
+            T2{m} = cluster(GMmodel2{m},[cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]');
+        catch
+            disp('Error. Line 370.');
+            T2{m} = [];
+        end
+        
         
         close all;figure;
         subplot(2,1,1);plot(x);hold on;plot(xc.*0.01+40,'r')
@@ -390,6 +403,8 @@ m2=1;
 %         T2{m} = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',numclust2(m),'Replicates',10);
         GMmodel2{m} = fitgmdist([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]',numclust2(m),'Replicates',10);
         T2{m} = cluster(GMmodel2{m},[cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]');
+    catch
+        disp('Unable to find number of clusters. Line 396.');
     end
     
 % Sort the spikes by clustering from wavelet coefficients
@@ -397,13 +412,13 @@ m2=1;
     for k = 1:numclust2(m)
         spikes_sorted2{m}{k} = spikes{m}(:,T2{m}==k);
         spikes_stim_sorted2{m}{k} = spikes_stim{m}(:,T2{m}==k);
-        entropy_spikes_stim_sorted2(m,k) = entropy(mean(spikes_stim_sorted2{m}{k},2))/log(length(mean(spikes_stim_sorted2{m}{k},2)));
+        entropy_spikes_stim_sorted2(m,k) = entropy1(mean(spikes_stim_sorted2{m}{k},2),2^8)/log10(2^8);
         entropy_diff2(m,k) = entropy_spikes_stim_sorted2(m,k) - entropy_stim(m);
         tr_sorted2{m}{k} = tr{m}(T2{m}==k);
-%         pk_sorted{m}{k} = pk{m}(T{m}==k);
-        for j = 2:length(tr_sorted2{m}{k})
-            IEI_sorted2{m}{k}(j-1)=(tr_sorted2{m}{k}(j)-tr_sorted2{m}{k}(j-1))/sr;
-        end
+%       pk_sorted{m}{k} = pk{m}(T{m}==k);
+            for j = 2:length(tr_sorted2{m}{k})
+                IEI_sorted2{m}{k}(j-1)=(tr_sorted2{m}{k}(j)-tr_sorted2{m}{k}(j-1))/sr;
+            end
         IEI_sorted2_mean(m,k) = mean(IEI_sorted2{m}{k});
         IEI_sorted2_std(m,k) = std(IEI_sorted2{m}{k});
         IEI_sorted2_CV(m,k) = IEI_sorted2_std(m,k)/IEI_sorted2_mean(m,k);
@@ -477,10 +492,12 @@ m2=1;
     % Repeat for sorted spikes (PCA)
     for k = 1:numclust(m)
         try
-        xc_phase_spikes_sorted{m}{k} = xc_phase_spikes{m}(T{m}==k);
-        meanphase_sorted{m}(k) = mean(xc_phase_spikes_sorted{m}{k});
-        semphase_sorted{m}(k) = std(xc_phase_spikes_sorted{m}{k})/sqrt(sum(T{m}==k));
-        VS_sorted(m,k) = 1/length(tr{m}(T{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted{m}{k})));
+            xc_phase_spikes_sorted{m}{k} = xc_phase_spikes{m}(T{m}==k);
+            meanphase_sorted{m}(k) = mean(xc_phase_spikes_sorted{m}{k});
+            semphase_sorted{m}(k) = std(xc_phase_spikes_sorted{m}{k})/sqrt(sum(T{m}==k));
+            VS_sorted(m,k) = 1/length(tr{m}(T{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted{m}{k})));
+        catch
+            disp('Unable to calculate VS. Line 489.');
         end
         try
         if stim_freq(m) < max_freq
@@ -490,6 +507,9 @@ m2=1;
         end
         scaling_fac_VS_sorted(m,k) = sum(pks_present)/numpkstim;
         end
+        catch
+            disp('Error. Line 500.');
+        end
         try
         if scaling_fac_VS_sorted(m,k) > 1
             warning(['Scaling factor for vector strength exceeds 1 at index ' num2str(m) '.']);
@@ -498,17 +518,21 @@ m2=1;
         else
             VSsc_sorted(m,k) = VS_sorted(m,k) * scaling_fac_VS_sorted(m,k);
         end
+        catch
+            disp('Error. Line 511.');
         end
-        end
+        
     end
     
     % Repeat for sorted spikes (WAVELET)
     for k = 1:numclust2(m)
         try
-        xc_phase_spikes_sorted2{m}{k} = xc_phase_spikes{m}(T2{m}==k);
-        meanphase_sorted2{m}(k) = mean(xc_phase_spikes_sorted2{m}{k});
-        semphase_sorted2{m}(k) = std(xc_phase_spikes_sorted2{m}{k})/sqrt(sum(T2{m}==k));
-        VS_sorted2(m,k) = 1/length(tr{m}(T2{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted2{m}{k})));
+            xc_phase_spikes_sorted2{m}{k} = xc_phase_spikes{m}(T2{m}==k);
+            meanphase_sorted2{m}(k) = mean(xc_phase_spikes_sorted2{m}{k});
+            semphase_sorted2{m}(k) = std(xc_phase_spikes_sorted2{m}{k})/sqrt(sum(T2{m}==k));
+            VS_sorted2(m,k) = 1/length(tr{m}(T2{m}==k))*abs(sum(exp(sqrt(-1).*xc_phase_spikes_sorted2{m}{k})));
+        catch
+            disp('Error. Line 524.');
         end
         try
         if stim_freq(m) < max_freq
@@ -517,18 +541,26 @@ m2=1;
             pks_present2(j) = length(intersect(1 + (j-1)*sl_stim:j*sl_stim,tr{m}(T2{m}==k)))>0;
         end
         end
+        catch
+            disp('Error. Line 534.');
+        end
+        
         try
-        scaling_fac_VS_sorted2(m,k) = sum(pks_present2(j))/numpkstim;
+            scaling_fac_VS_sorted2(m,k) = sum(pks_present2(j))/numpkstim;
+        catch
+            disp('Error. Line 540.');
         end
+        
         try
-        if scaling_fac_VS_sorted2(m,k) > 1
-            warning(['Scaling factor for vector strength exceeds 1 at index ' num2str(m) '.']);
-        elseif scaling_fac_VS_sorted(m,k) < 0
-            warning(['Scaling factor for vector strength below 0 at index ' num2str(m) '.']);
-        else
-            VSsc_sorted2(m,k) = VS_sorted2(m,k) * scaling_fac_VS_sorted2(m,k);
-        end
-        end
+            if scaling_fac_VS_sorted2(m,k) > 1
+                warning(['Scaling factor for vector strength exceeds 1 at index ' num2str(m) '.']);
+            elseif scaling_fac_VS_sorted(m,k) < 0
+                warning(['Scaling factor for vector strength below 0 at index ' num2str(m) '.']);
+            else
+                VSsc_sorted2(m,k) = VS_sorted2(m,k) * scaling_fac_VS_sorted2(m,k);
+            end
+        catch
+            disp('Error. Line 552.');
         end
     end
 end 
@@ -537,45 +569,68 @@ end
 try
     inc = find(VS_sorted(m,:)<0.99);
     inc2 = find(VS_sorted2(m,:)<0.99);
+catch
+    disp('Error. Line 562.');
 end
+
 try
     VS_max(m) = max(VS_sorted(m,inc));                  % Maximum VS
     VS_max2(m) = max(VS_sorted2(m,inc2));                  % Maximum VS
+catch
+    disp('Error. Line 569.');
 end
+
 try
     maxind = find(VS_sorted(m,:)==VS_max(m));    % Neuron index
     maxind2 = find(VS_sorted2(m,:)==VS_max2(m));    % Neuron index
     VS_max_ind(m) = maxind(1);VS_max_ind2(m) = maxind2(1);
+catch
+    disp('Error. Line 577.');
 end
+
 try
     numspk_max(m) = size(spikes_sorted{m}{VS_max_ind(m)},2);
     numspk_max2(m) = size(spikes_sorted2{m}{VS_max_ind2(m)},2);
     proportion_numspk_max(m) = numspk_max(m)/length(tr{m});
+catch
+    disp('Error. Line 585.');
 end
+
 try
     VSsc_max(m) = max(VSsc_sorted(m,inc));
     maxind = find(VSsc_sorted(m,:)==VSsc_max(m));
     VSsc_max_ind(m) = maxind(1);
+catch
+    disp('Error. Line 593.');
 end
+
 try
     numspk_max_sc(m) = size(spikes_sorted{m}{VSsc_max_ind(m)},2);
     proportion_numspk_max_sc(m) = numspk_max_sc(m)/length(tr{m});
     samepk_scaled(m) = VS_max_ind(m) == VSsc_max_ind(m);
     proportion_numspk_max2(m) = numspk_max2(m)/length(tr{m});
+catch
+    disp('Error. Line 602.');
 end
+
 try
     VSsc_max2(m) = max(VSsc_sorted2(m,inc2));
     maxind2 = find(VSsc_sorted2(m,:)==VSsc_max2(m));
     VSsc_max_ind2(m) = maxind2(1);
+catch
+    disp('Error. Line 610.');
 end
+
 try
     numspk_max_sc2(m) = size(spikes_sorted2{m}{VSsc_max_ind2(m)},2);
     proportion_numspk_max_sc2(m) = numspk_max_sc2(m)/length(tr{m});
     samepk_scaled2(m) = VS_max_ind2(m) == VSsc_max_ind2(m);
+catch
+    disp('Error. Line 618.');
 end
 
 
-    end
+    
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
