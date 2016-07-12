@@ -41,6 +41,17 @@ elseif modtype == 3
         tvec(:,j) = linspace(0+duration_sec*(j-1),duration_sec*j,Fs*duration_sec);
         outvec(:,j) = SF*ampl(j).*randn(1,length(tvec));
     end
+elseif modtype == 4
+    ampl = modparams{1};
+    delay = modparams{2};
+    duration = modparams{3};
+    for j = 1:length(ampl);        
+        tvec(:,j) = linspace(0+duration_sec*(j-1),duration_sec*j,Fs*duration_sec);
+        outvec(:,j) = zeros(1,length(tvec));
+        qr1 = findnearest(tvec(:,1),delay);
+        qr2 = findnearest(tvec(:,1),duration+delay);
+        outvec(qr1:qr2,j) = ampl(j);
+    end
 end
 
 sizeT = size(tvec);

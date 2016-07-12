@@ -1,8 +1,10 @@
 clear all; close all; clc
 
 % INPUT STIMULUS AND DATA FILES
-fn1 = '2016_06_22_0003.abf';
-fn2 = 'P841-freqstim_f0.1to100log_amp10_30sec_1kHz_N25.abf';
+fn1 = '2016_07_07_0035.abf';
+fn2 = 'freqstim_f0.5to100_amp10_10sec_5kHz_N16.abf';
+fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
+%fn2 = 'whitenoise_std1_Fs5kHz_30sec.abf';
 
 % Import data
 cd 'C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\'
@@ -34,7 +36,7 @@ nonraw = 1:N;
 
 % Define Ir, Xc 
 % Because wave
-stimyn = input('Stimulus? (y/n): ');
+stimyn = input('Stimulus? (y/n OR 1/0): ');
 
 if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
 if length(data) - length(stimulus) > 0
@@ -47,15 +49,39 @@ else
     data0 = data;
 end
 % Partition the data
+for k = 1:size(data,3)
 for j = 1:N
-    xL = length(data0)/N;
-    Ir0{j} = data0(1+(j-1)*xL:j*xL); Ir{j} = Ir0{j} - mean(Ir0{j});
-    if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
-        Xc0{j} = stimulus(1+(j-1)*xL:j*xL); Xc{j} = Xc0{j} - mean(Xc0{j});
-    else
-        Xc{j} = zeros(1,length(Ir{j}));
+    if N>1 && size(data,3) ==1
+        xL = length(data0)/N;
+        Ir0{j} = data0(1+(j-1)*xL:j*xL,k); Ir{j} = Ir0{j} - mean(Ir0{j});
+        if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
+            Xc0{j} = stimulus(1+(j-1)*xL:j*xL); Xc{j} = Xc0{j} - mean(Xc0{j});
+        else
+            Xc{j} = zeros(1,length(Ir{j}));
+        end
+        tvec{j} = 0:dt:(length(Ir{j})-1)*dt;
+    elseif N == 1 && size(data,3) > 1
+        xL = length(data0)/N;
+        Ir0{k} = data0(:,k)'; Ir{k} = Ir0{k} - mean(Ir0{k});
+        if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
+            Xc0{k} = stimulus(1+(j-1)*xL:j*xL); Xc{k} = Xc0{k} - mean(Xc0{k});
+        else
+            Xc{k} = zeros(1,length(Ir{k}));
+        end
+        tvec{k} = 0:dt:(length(Ir{k})-1)*dt;
+        nonraw = 1:size(data,3);
+    elseif N > 1 && size(data,3) > 1
+        xL = length(data0)/N;
+        Ir0{j+(k-1)*N} = data0(1+(j-1)*xL:j*xL,k); Ir{j+(k-1)*N} = Ir0{j+(k-1)*N} - mean(Ir0{j+(k-1)*N});
+        if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
+            Xc0{j+(k-1)*N} = stimulus(1+(j-1)*xL:j*xL); Xc{j+(k-1)*N} = Xc0{j+(k-1)*N} - mean(Xc0{j+(k-1)*N});
+        else
+            Xc{j+(k-1)*N} = zeros(1,length(Ir{j+(k-1)*N}));
+        end
+        tvec{j+(k-1)*N} = 0:dt:(length(Ir{j+(k-1)*N})-1)*dt;
+        nonraw = 1:N*size(data,3);
     end
-    tvec{j} = 0:dt:(length(Ir{j})-1)*dt;
+end
 end
 
 disp('Saving...')
@@ -68,20 +94,20 @@ disp('Finished.')
 %% Unsupervised Analysis
 clear all; close all; clc;
 
-date = '2016_06_22';        % INPUT
-nanalyze = 6;               % INPUT
+date = '2016_07_07';        % INPUT
+nanalyze = 36;               % INPUT
 
-for j = 1:nanalyze
+for j = 12:24
     if j-1 < 10
         fn = [date '_000' num2str(j-1)];
         disp(['Analyzing ' fn '...']);
         cd(['C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\MATLAB\' fn])
-        spikesortinganalysis(pwd,0,1,1,1);
+        spikesortinganalysis(pwd,0,1,1,0);
     elseif j-1 < 100
         fn = [date '_00' num2str(j-1)];
         disp(['Analyzing ' fn '...']);
         cd(['C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\MATLAB\' fn])
-        spikesortinganalysis(pwd,0,1,1,1);
+        spikesortinganalysis(pwd,0,1,1,0);
     end
 end
 disp('COMPLETE');
