@@ -1,10 +1,11 @@
 clear all; close all; clc
 
 % INPUT STIMULUS AND DATA FILES
-fn1 = '2016_07_07_0035.abf';
+fn1 = '2016_07_12_0005.abf';
 fn2 = 'freqstim_f0.5to100_amp10_10sec_5kHz_N16.abf';
-fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
+%fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
 %fn2 = 'whitenoise_std1_Fs5kHz_30sec.abf';
+%fn2 = 'freqstim_f0.5to100_amp50_5sec_5kHz_N27.abf';
 
 % Import data
 cd 'C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\'
@@ -94,20 +95,20 @@ disp('Finished.')
 %% Unsupervised Analysis
 clear all; close all; clc;
 
-date = '2016_07_07';        % INPUT
-nanalyze = 36;               % INPUT
+date = '2016_07_12';        % INPUT
+nanalyze = 6;               % INPUT
 
-for j = 12:24
+for j = 1:nanalyze
     if j-1 < 10
         fn = [date '_000' num2str(j-1)];
         disp(['Analyzing ' fn '...']);
         cd(['C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\MATLAB\' fn])
-        spikesortinganalysis(pwd,0,1,1,0);
+        spikesortinganalysis(pwd,0,0,1,0);
     elseif j-1 < 100
         fn = [date '_00' num2str(j-1)];
         disp(['Analyzing ' fn '...']);
         cd(['C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\MATLAB\' fn])
-        spikesortinganalysis(pwd,0,1,1,0);
+        spikesortinganalysis(pwd,0,0,1,0);
     end
 end
 disp('COMPLETE');
