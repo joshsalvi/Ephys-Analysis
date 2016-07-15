@@ -1,11 +1,13 @@
 clear all; close all; clc
 
 % INPUT STIMULUS AND DATA FILES
-fn1 = '2016_07_12_0005.abf';
+fn1 = '2016_07_14_0005.abf';
 fn2 = 'freqstim_f0.5to100_amp10_10sec_5kHz_N16.abf';
-%fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
-%fn2 = 'whitenoise_std1_Fs5kHz_30sec.abf';
+% fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
+% fn2 = 'whitenoise_std1_Fs5kHz_30sec.abf';
 %fn2 = 'freqstim_f0.5to100_amp50_5sec_5kHz_N27.abf';
+% fn2 =  'freqstim_f0.5to100_amp25_10sec_5kHz_N16.abf';
+% fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
 
 % Import data
 cd 'C:\Users\Administrator\Documents\Molecular Devices\pCLAMP\Data\'
@@ -41,8 +43,33 @@ stimyn = input('Stimulus? (y/n OR 1/0): ');
 
 if stimyn == 1 || stimyn == 'Y' || stimyn == 'y'
 if length(data) - length(stimulus) > 0
-    indcut = round((length(data) - length(stimulus))/2);
-    data0 = data(indcut:end-indcut);
+    data00 = data;data0=zeros(1,length(data));
+    m=1;
+    while length(data0) - length(stimulus) > 0 
+        clear data0
+        if m == 1
+            indcut = round((length(data) - length(stimulus))/2);
+        else
+            indcut = round((length(data00) - length(stimulus)));
+        end
+        
+        for j = 1:size(data,2)
+            for k = 1:size(data,3)
+                if m == 1
+                    data0(:,j,k) = data(indcut:end-indcut,j,k);
+                else
+                    data0(:,j,k) = data00(1:end-indcut,j,k);
+                end
+            end
+        end
+        m=m+1;
+    end
+elseif length(stimulus) - length(data) > 0
+    while length(stimulus) - length(data) > 0
+        indcut = round((length(stimulus) - length(data)));
+        stimulus = stimulus(1:end-indcut);
+        data0 = data;
+    end
 else
     data0 = data;
 end
@@ -95,7 +122,7 @@ disp('Finished.')
 %% Unsupervised Analysis
 clear all; close all; clc;
 
-date = '2016_07_12';        % INPUT
+date = '2016_07_14';        % INPUT
 nanalyze = 6;               % INPUT
 
 for j = 1:nanalyze
