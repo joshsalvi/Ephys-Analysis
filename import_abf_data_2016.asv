@@ -125,7 +125,7 @@ clear all; close all; clc;
 date = '2016_07_25';        % INPUT
 nanalyze = 9;               % INPUT
 
-for j = 6:nanalyze
+for j = 1:nanalyze
     if j-1 < 10
         fn = [date '_000' num2str(j-1)];
         disp(['Analyzing ' fn '...']);

@@ -104,7 +104,7 @@ for m = 1:length(nonraw)
         
         % Extract spikes, peaks in command signal, set maximum frequency
         % limit for optimization purposes
-        thr = 5*median(abs(x)./0.6745);
+        thr = 6*median(abs(x)./0.6745);
         [pk{m}, tr{m}] = PTDetect(x, thr);
         [pkstim{m}, trstim{m}] = PTDetect(xc, std(xc-mean(xc)));
         numpkstim = length(pkstim{m});
@@ -113,7 +113,7 @@ for m = 1:length(nonraw)
         max_freq = 1e3;
         
     
-if length(tr{m}) > 0 && length(tr{m}) < 5e4
+if ~isempty(tr{m}) && length(tr{m}) < 5e4
     for j = 1:length(tr{m})  
         
             % Extract spikes
@@ -184,7 +184,7 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
         dims(m) = 2;
     end
     nn=0;
-     while r == 1 && exist('nc') == 0 && nn < 100
+     while r == 1 && exist('nc') == 0 && nn < 4
          %}
         
         [c{m}, score{m}, latent{m}, tsquared{m}, explained{m}, mu{m}]=pca(spikes{m});
@@ -202,20 +202,20 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
         % principal components.
         explainedvariance(m) = 0;
         nn=0;
-        while explainedvariance(m) < 80 && nn < 100
+        while explainedvariance(m) < 70 && nn < 4
             
         if manualyn == 1
             if m2 > 1
                 numclust(m) = input('Number of clusters:   ');
                 dims(m) = input('Dimensions (1,2,3,...):   ');
             else
-                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:5);
+                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:4);
                 numclust(m) = evalclust{m}.OptimalK;
             end
         else
             try
               
-                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:5);
+                evalclust{m} = evalclusters(c{m}(:,1:dims(m)),'gmdistribution','gap','KList',1:4);
 
                 numclust(m) = evalclust{m}.OptimalK;
             end
@@ -229,7 +229,7 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
             explainedvariance(m) = 0;
         end
         
-        if explainedvariance(m) < 80
+        if explainedvariance(m) < 70
             dims(m) = dims(m) + 1;
         end
         nn=nn+100;
@@ -326,7 +326,7 @@ if length(tr{m}) > 0 && length(tr{m}) < 5e4
     
     tel1 = toc;
     try
-    disp(['PCA: Number of Clusters = ' num2str(numclust(m)) '; Time elapsed: ' num2str(tel1) ' seconds.']);  
+        disp(['PCA: Number of Clusters = ' num2str(numclust(m)) '; Time elapsed: ' num2str(tel1) ' seconds.']);  
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -394,7 +394,7 @@ m2=1;
 %                 for j = 2:5
 %                     clust2(:,j-1) = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',j,'Replicates',5);
 %                 end
-                evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:5);
+                evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:4);
                 numclust2(m) = evalclust2{m}.OptimalK;
             end
         else
@@ -402,7 +402,7 @@ m2=1;
 %                 clust2(:,j-1) = kmeans([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:)]',j,'Replicates',5);
 %             end
 try
-            evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:5);
+            evalclust2{m} = evalclusters([cA{m}(coeff1(m),:);cA{m}(coeff2(m),:);cA{m}(coeff3(m),:)]','gmdistribution','gap','KList',1:4);
             numclust2(m) = evalclust2{m}.OptimalK;
 end
         end
