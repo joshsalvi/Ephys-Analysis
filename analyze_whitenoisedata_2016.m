@@ -29,8 +29,8 @@ for j = 1:length(nonraw)
     catch
         qr2(j)=1;
     end
-    %vars1 = var(spikes_stim_sorted_mean{j}(1:200,:));qr(j) = find(vars1==max(vars1));
-    %vars2 = var(spikes_stim_sorted2_mean{j}(1:200,:));qr2(j) = find(vars2==max(vars2));
+%     vars1 = var(spikes_stim_sorted_mean{j}(1:200,:));qr(j) = find(vars1==max(vars1));
+%     vars2 = var(spikes_stim_sorted2_mean{j}(1:200,:));qr2(j) = find(vars2==max(vars2));
     try
     stimulus_mean(:,j) = spikes_stim_sorted_mean{j}(:,qr(j));
     end
@@ -52,9 +52,9 @@ for j = 1:LL
     end
 end
 %%
-inds = 1:10;
+inds = 1:2:LL;
 figure;
-plot((dt-length(stimulus_mean2)/2*dt:dt:length(stimulus_mean2)/2*dt).*1e3,mean(stimulus_mean2(:,6:8),2))
+plot((dt-length(stimulus_mean2)/2*dt:dt:length(stimulus_mean2)/2*dt).*1e3,mean(stimulus_mean2(:,inds),2))
 
 cov1= cov([mean(stimulus_mean2(1:250,6),2)';mean(stimulus_mean2(1:250,7),2)';mean(stimulus_mean2(1:250,8),2)']);
 cov2= cov([mean(stimulus_mean2(251:500,6),2)';mean(stimulus_mean2(251:500,7),2)';mean(stimulus_mean2(251:500,8),2)']);
