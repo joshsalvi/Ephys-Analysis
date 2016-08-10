@@ -122,8 +122,8 @@ disp('Finished.')
 %% Unsupervised Analysis
 clear all; close all; clc;
 
-date = '2016_08_08';        % INPUT
-nanalyze = 4;               % INPUT
+date = '2016_08_09';        % INPUT
+nanalyze = 6;               % INPUT
 
 for j = 1:nanalyze
     if j-1 < 10
