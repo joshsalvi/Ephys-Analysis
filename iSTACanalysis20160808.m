@@ -8,7 +8,21 @@ clear Stim spn sp
 disp('extracting spikes...')
 sp = zeros(1,length(Xc{1}));
 for j = 1:length(tr)
-    sp(tr{j}) = sp(tr{j})+1;
+    try
+        qr(j) = find(VS_sorted(j,:)==VS_max(j));
+    catch
+        qr(j)=1;
+    end
+    try
+        qr2(j) = find(VS_sorted2(j,:)==VS_max2(j));
+    catch
+        qr2(j)=1;
+    end
+%     vars1 = var(spikes_stim_sorted_mean{j}(1:200,:));qr(j) = find(vars1==max(vars1));
+%     vars2 = var(spikes_stim_sorted2_mean{j}(1:200,:));qr2(j) = find(vars2==max(vars2));
+    
+    sp(tr_sorted2{j}{qr2(j)}) = sp(tr_sorted2{j}{qr2(j)})+1;
+    
 end
 Stim = Xc{1};
 disp('STC...')

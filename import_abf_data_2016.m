@@ -1,9 +1,9 @@
 clear all; close all; clc
 
 % INPUT STIMULUS AND DATA FILES
-fn1 = '2016_08_09_0004.abf';
+fn1 = '2016_08_10_0007.abf';
 fn2 = 'freqstim_f0.5to100_amp10_10sec_5kHz_N16.abf';
-% fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
+fn2 = 'steps-ampn10to10-1sec-5kHz-N41.abf';
 % fn2 = 'whitenoise_std1_Fs5kHz_30sec.abf';
 % fn2 = 'freqstim_f0.5to100_amp50_5sec_5kHz_N27.abf';
 % fn2 =  'freqstim_f0.5to100_amp25_10sec_5kHz_N16.abf';
@@ -122,10 +122,10 @@ disp('Finished.')
 %% Unsupervised Analysis
 clear all; close all; clc;
 
-date = '2016_08_09';        % INPUT
-nanalyze = 6;               % INPUT
+date = '2016_08_10';        % INPUT
+nanalyze = 10;              % INPUT
 
-for j = 1:nanalyze
+for j = 8:nanalyze
     if j-1 < 10
         fn = [date '_000' num2str(j-1)];
         disp(['Analyzing ' fn '...']);
