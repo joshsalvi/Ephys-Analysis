@@ -48,3 +48,21 @@ subplot(2,3,5);errorbar(freqstim,mean_phase_sorted_mean,mean_phase_sorted_sem);y
 subplot(2,3,6);errorbar(freqstim,mean_phase_sorted2_mean,mean_phase_sorted2_sem);ylabel('phase');xlabel('Stimulus frequency (Hz)')
 % axis([min(freqstim)*0.5 max(freqstim)*1.5 mean(mean_phase_sorted2_mean)*0.5 max(mean_phase_sorted_mean)*1.5]);
 
+%% 
+setfiguredefaults(5);
+
+inds = 1:length(freqstim);
+inds = 1:length(freqstim);
+inds = [1:7 9 11:length(freqstim)];
+
+% close all;
+
+
+figure
+h=errorbar(freqstim(inds),VSmean_sorted2(inds),VSsem_sorted2(inds));
+xlabel('Stimulus frequency');
+ylabel('Vector strength')
+ha = get(h,'Parent');
+set(ha,'XScale','log')
+set(ha,'XLim',[min(freqstim(inds))-0.2*min(freqstim(inds)) max(freqstim(inds))+0.2*max(freqstim(inds))])
+
