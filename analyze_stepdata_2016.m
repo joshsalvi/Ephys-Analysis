@@ -87,10 +87,16 @@ for j = 1:length(pulsemags)
     meanspikeonset(j) = mean(horzcat(spikeonset_pulse(qr),spikeonset_postpulse(qrn)));
     semspikeonset(j) = mean(horzcat(spikeonset_pulse(qr),spikeonset_postpulse(qrn)))./sqrt(length(qr)+length(qrn));
     
+    clear psth0 pstht0
+    psth0 = [];
     for k = 1:length(qr)
         rasterplot_x{j}{k} = tvec{1}(tr{qr(k)});
         rasterplot_y{j}{k} = k.*ones(1,length(tr{qr(k)}));
+        psth0(:,k) = psth_spikes{qr(k)};
+        pstht0(:,k) =psth_times{qr(k)};
     end
+    meanpsthtime{j} = mean(pstht0,2);
+    meanpsth{j} = mean(psth0,2);
 end
     
    
